@@ -1,8 +1,12 @@
 #! /usr/bin/env python
 import subprocess
 
-def getCPUUsage(interval, count):
-  p = subprocess.Popen(['mpstat', '-P', 'ALL', str(interval), str(count)], stdout = subprocess.PIPE, stderr = subprocess.PIPE)  
+def getCPUUsage(hostname, interval, count):
+  cmd = 'mpstat -P ALL {} {}'.format(interval, count)
+  print(cmd)
+
+  #p = subprocess.Popen(['mpstat', '-P', 'ALL', str(interval), str(count)], stdout = subprocess.PIPE, stderr = subprocess.PIPE)  
+  p = subprocess.Popen(['ssh', hostname, cmd], stdout = subprocess.PIPE, stderr = subprocess.PIPE)  
   out, err = p.communicate()
   if err is not None and err != '':
     print(err)
@@ -25,4 +29,4 @@ def getCPUUsage(interval, count):
 
   return usage
 
-print(getCPUUsage(2, 1))
+print(getCPUUsage('localhost', 2, 1))
