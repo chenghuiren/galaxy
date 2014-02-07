@@ -29,4 +29,25 @@ def getCPUUsage(hostname, interval, count):
 
   return usage
 
-print(getCPUUsage('localhost', 2, 1))
+def getWho(hostname):
+  cmd = 'who'
+
+  p = subprocess.Popen(['ssh', hostname, cmd], stdout = subprocess.PIPE, stderr = subprocess.PIPE)  
+  out, err = p.communicate()
+  if err is not None and err != '':
+    print(err)
+    return None
+
+  lines = out.split('\n')
+
+  users = []
+
+  for line in lines:
+    columns = line.split()
+
+    if len(columns) == 0: 
+      continue
+
+    users.append(columns[0])
+
+  return users

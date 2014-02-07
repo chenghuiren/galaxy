@@ -11,7 +11,7 @@ def worker(hostname, cmd):
     users = util.getWho(hostname)
     otherUser = False
     for user in users:
-      if user != 'chren' && user != 'root':
+      if user != 'chren' and user != 'root':
         otherUser = True
         break
 
@@ -46,4 +46,3 @@ for i in range(2, 97):
   p = multiprocessing.Process(target = worker, args = (hostname, cmd))
   ps.append(p)
   p.start()
-  
