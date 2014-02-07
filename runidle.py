@@ -1,10 +1,12 @@
-#! /usr/bin/env python3
+#! /usr/bin/env python
 import util
 import asyncproc
 import os
-import multiprocessing
+import threading
+import time
 
 def worker(hostname, cmd):
+  print('hostname, cmd:' + hostname + ',' + cmd)
   started = False
   p = None
   while True:
@@ -34,15 +36,18 @@ def worker(hostname, cmd):
 
     if not started and not otherUser:
       print('starting the process...')
-      p = asyncproc.Process(['ssh', '-t', hostname, cmd], stdout = subprocess.PIPE, stderr = subprocess.PIPE)  
+      p = asyncproc.Process(['ssh', '-t', hostname, cmd])  
+      started = True
+
+    time.sleep(5)
 
 
-cmd = input('input command:')
+cmd = raw_input('input command:')
 
 ps = []
-for i in range(2, 97):
+for i in range(2, 10):
   hostname = 'galaxy{:03d}'.format(i)
 
-  p = multiprocessing.Process(target = worker, args = (hostname, cmd))
+  p = threading.Thread(target = worker, args = (hostname, cmd))
   ps.append(p)
   p.start()

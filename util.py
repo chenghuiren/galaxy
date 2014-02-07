@@ -32,11 +32,10 @@ def getCPUUsage(hostname, interval, count):
 def getWho(hostname):
   cmd = 'who'
 
-  p = subprocess.Popen(['ssh', hostname, cmd], stdout = subprocess.PIPE, stderr = subprocess.PIPE)  
+  p = subprocess.Popen(['ssh', '-t', hostname, cmd], stdout = subprocess.PIPE, stderr = subprocess.PIPE)  
   out, err = p.communicate()
   if err is not None and err != '':
-    print(err)
-    return None
+    print('error:' + err)
 
   lines = out.split('\n')
 
