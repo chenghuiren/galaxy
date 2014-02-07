@@ -34,7 +34,7 @@ def worker(hostname, cmd):
 
     if not started and not otherUser:
       print('starting the process...')
-      p = asyncproc.Process(['ssh', hostname, cmd], stdout = subprocess.PIPE, stderr = subprocess.PIPE)  
+      p = asyncproc.Process(['ssh', '-t', hostname, cmd], stdout = subprocess.PIPE, stderr = subprocess.PIPE)  
 
 
 cmd = input('input command:')
