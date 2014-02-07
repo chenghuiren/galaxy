@@ -19,6 +19,10 @@ def worker(hostname, cmd):
   p = None
   while True:
     users = util.getWho(hostname)
+    if users is None:
+      lprint('hostname', 'unreachable')
+      break
+
     otherUser = False
     for user in users:
       if user != 'chren' and user != 'root':
