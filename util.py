@@ -5,7 +5,6 @@ def getCPUUsage(hostname, interval, count):
   cmd = 'mpstat -P ALL {} {}'.format(interval, count)
   print(cmd)
 
-  #p = subprocess.Popen(['mpstat', '-P', 'ALL', str(interval), str(count)], stdout = subprocess.PIPE, stderr = subprocess.PIPE)  
   p = subprocess.Popen(['ssh', hostname, cmd], stdout = subprocess.PIPE, stderr = subprocess.PIPE)  
   out, err = p.communicate()
   if err is not None and err != '':
@@ -32,10 +31,12 @@ def getCPUUsage(hostname, interval, count):
 def getWho(hostname):
   cmd = 'who'
 
-  p = subprocess.Popen(['ssh', '-t', hostname, cmd], stdout = subprocess.PIPE, stderr = subprocess.PIPE)  
+  p = subprocess.Popen(['ssh', '-t', '-o ConnectTimeout=5', hostname, cmd], stdout = subprocess.PIPE, stderr = subprocess.PIPE)  
+
   out, err = p.communicate()
-  if err is not None and err != '':
-    print('error:' + err)
+
+  if out == "":
+    return None
 
   lines = out.split('\n')
 

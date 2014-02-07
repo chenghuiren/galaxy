@@ -4,9 +4,17 @@ import asyncproc
 import os
 import threading
 import time
+from multiprocessing import Lock
+
+lock = Lock()
+
+def lprint(*args):
+  lock.acquire()
+  print(' '.join(args))
+  lock.release()
 
 def worker(hostname, cmd):
-  print('hostname, cmd:' + hostname + ',' + cmd)
+  lprint('hostname, cmd:' + hostname + ',' + cmd)
   started = False
   p = None
   while True:
@@ -19,23 +27,19 @@ def worker(hostname, cmd):
 
     if started and not otherUser:
       poll = p.wait(os.WNOHANG)
-
       out = p.read()
       if out != '': 
-        print(hostname + ':' + out)
-
+        lprint(hostname + ':' + out)
       if poll != None: 
-        print(hostname + ': finished')
+        lprint(hostname + ': finished')
         break
-
-    if started and otherUser:
-      print('other users loged in. killing the process...')
+    elif started and otherUser:
+      lprint('other users loged in. killing the process...')
       p.terminate()
-      print('killed')
+      lprint('killed')
       started = False
-
-    if not started and not otherUser:
-      print('starting the process...')
+    elif not started and not otherUser:
+      lprint('starting the process...')
       p = asyncproc.Process(['ssh', '-t', hostname, cmd])  
       started = True
 
