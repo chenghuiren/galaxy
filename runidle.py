@@ -1,20 +1,49 @@
 #! /usr/bin/env python3
+import util
+import asyncproc
+import os
+import multiprocessing
 
-from sshtaskmanager import SSHTaskManager
+def worker(hostname, cmd):
+  started = False
+  p = None
+  while True:
+    users = util.getWho(hostname)
+    otherUser = False
+    for user in users:
+      if user != 'chren' && user != 'root':
+        otherUser = True
+        break
 
-connecttimeout = 5
-command = input('input the command you want to run:')
+    if started and not otherUser:
+      poll = p.wait(os.WNOHANG)
 
-nullfile = open('/dev/null', 'w')
-tasks = SSHTaskManager(connecttimeout)
+      out = p.read()
+      if out != '': 
+        print(hostname + ':' + out)
 
-for i in range(1, 97):
-  host = 'galaxy{:03d}'.format(i)
-  tasks.submit(host, command, stdout=nullfile)
+      if poll != None: 
+        print(hostname + ': finished')
+        break
 
-tasks.join()
+    if started and otherUser:
+      print('other users loged in. killing the process...')
+      p.terminate()
+      print('killed')
+      started = False
+
+    if not started and not otherUser:
+      print('starting the process...')
+      p = asyncproc.Process(['ssh', hostname, cmd], stdout = subprocess.PIPE, stderr = subprocess.PIPE)  
 
 
+cmd = input('input command:')
 
+ps = []
+for i in range(2, 97):
+  hostname = 'galaxy{:03d}'.format(i)
 
+  p = multiprocessing.Process(target = worker, args = (hostname, cmd))
+  ps.append(p)
+  p.start()
   
