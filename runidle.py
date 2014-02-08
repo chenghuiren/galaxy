@@ -22,6 +22,7 @@ def worker(hostname, cmd):
     if users is None:
       lprint('hostname', 'unreachable')
       break
+    print(users)
 
     otherUser = False
     for user in users:
@@ -53,7 +54,7 @@ def worker(hostname, cmd):
 cmd = raw_input('input command:')
 
 ps = []
-for i in range(2, 10):
+for i in range(18, 20):
   hostname = 'galaxy{:03d}'.format(i)
 
   p = threading.Thread(target = worker, args = (hostname, cmd))
