@@ -59,3 +59,7 @@ for i in range(2, 10):
   p = threading.Thread(target = worker, args = (hostname, cmd))
   ps.append(p)
   p.start()
+
+raw_input('press enter to terminate...')
+for p in ps:
+  p.terminate()
