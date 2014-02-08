@@ -4,14 +4,14 @@ import asyncproc
 import os
 import threading
 import time
-from multiprocessing import Lock
+from threading import Lock
 
-lock = Lock()
+mtx = Lock()
 
 def lprint(*args):
-  lock.acquire()
+  #mtx.acquire()
   print(' '.join(args))
-  lock.release()
+  #mtx.release()
 
 def worker(hostname, cmd):
   lprint('hostname, cmd:' + hostname + ',' + cmd)
@@ -22,6 +22,7 @@ def worker(hostname, cmd):
     if users is None:
       lprint('hostname', 'unreachable')
       break
+    print(users)
 
     otherUser = False
     for user in users:
@@ -47,13 +48,13 @@ def worker(hostname, cmd):
       p = asyncproc.Process(['ssh', '-t', hostname, cmd])  
       started = True
 
-    time.sleep(5)
+    time.sleep(1)
 
 
 cmd = raw_input('input command:')
 
 ps = []
-for i in range(2, 10):
+for i in range(2,5):
   hostname = 'galaxy{:03d}'.format(i)
 
   p = threading.Thread(target = worker, args = (hostname, cmd))
