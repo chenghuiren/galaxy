@@ -1,22 +1,27 @@
 #! /usr/bin/env python
 import util
-import asyncproc
 import os
-import threading
 import time
-from threading import Lock
+from threading import Lock, Thread
+from subprocess import Popen
 
 mtx = Lock()
 
+def isRunning(pid):
+  return os.system('ps -p {} &> /dev/null'.format(pid)) == 0
+
+def kill(pid):
+  os.system('kill {}'.format(pid))
+
 def lprint(*args):
-  #mtx.acquire()
+  mtx.acquire()
   print(' '.join(args))
-  #mtx.release()
+  mtx.release()
 
 def worker(hostname, cmd):
   lprint('hostname, cmd:' + hostname + ',' + cmd)
   started = False
-  p = None
+  pid = None
   while True:
     users = util.getWho(hostname)
     if users is None:
@@ -31,22 +36,22 @@ def worker(hostname, cmd):
         break
 
     if started and not otherUser:
-      poll = p.wait(os.WNOHANG)
-      out = p.read()
-      if out != '': 
-        lprint(hostname + ':' + out)
-      if poll != None: 
-        lprint(hostname + ': finished')
+      if not isRunning(pid):
+        lprint('done')
         break
     elif started and otherUser:
       lprint('other users loged in. killing the process...')
-      p.terminate()
+      kill(pid)
       lprint('killed')
       started = False
     elif not started and not otherUser:
       lprint('starting the process...')
-      p = asyncproc.Process(['ssh', '-t', hostname, cmd])  
-      started = True
+      pid = os.fock()
+      if pid == 0: 
+        Popen(['ssh', '-t', hostname, cmd])
+        sys.exit(0)
+      else:
+        started = True
 
     time.sleep(1)
 
@@ -57,7 +62,7 @@ ps = []
 for i in range(2,5):
   hostname = 'galaxy{:03d}'.format(i)
 
-  p = threading.Thread(target = worker, args = (hostname, cmd))
+  p = Thread(target = worker, args = (hostname, cmd))
   ps.append(p)
   p.start()
 
